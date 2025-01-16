@@ -43,6 +43,10 @@ float interest(float t, float amount, int rate)
     return (SI);
 }
 
+// .
+// .
+// .
+// -> Menu 1 Option to create new account
 void new_account()
 {
     int choice;
@@ -110,6 +114,105 @@ add_invalid:
     }
 }
 
+// .
+// .
+// .
+// -> Menu 2 Option to edit existing account
+void edit()
+{
+    int choice;
+    int test = 0;
+    FILE *old, *newrec;
+    old = fopen("record.dat", "r");
+    newrec = fopen("new.dat", "w");
+
+    printf("\nEnter the account no. of the customer whose info you want to change:");
+    scanf("%d", &upd.acc_no);
+
+    while (fscanf(old, "%d %s %d/%d/%d %d %s %lf %s %f %d/%d/%d\n", &add.acc_no, add.name, &add.dob.day, &add.dob.month, &add.dob.year, &add.age, add.address, &add.phone, add.acc_type, &add.amt, &add.deposit.month, &add.deposit.day, &add.deposit.year) != EOF)
+    {
+        if (add.acc_no == upd.acc_no)
+        {
+            test = 1;
+
+        invalid_state:
+
+            printf("\nWhich information do you want to change?\n1.Address\n2.Phone\n\nEnter your choice(1 for address and 2 for phone):");
+            scanf("%d", &choice);
+            system("cls");
+
+            if (choice == 1)
+            {
+                printf("Enter the new address:");
+                scanf("%s", &upd.address);
+
+                fprintf(newrec, "%d %s %d/%d/%d %d %s %lf %s %f %d/%d/%d\n", add.acc_no, add.name, add.dob.day, add.dob.month, add.dob.year, add.age, upd.address, add.phone, add.acc_type, add.amt, add.deposit.day, add.deposit.month, add.deposit.year);
+                system("cls");
+                printf("Changes saved!");
+            }
+            else if (choice == 2)
+            {
+                printf("Enter the new phone number:");
+                scanf("%d", &upd.phone);
+
+                fprintf(newrec, "%d %s %d/%d/%d %d %s %lf %s %f %d/%d/%d\n", add.acc_no, add.name, add.dob.day, add.dob.month, add.dob.year, add.age, add.address, upd.phone, add.acc_type, add.amt, add.deposit.day, add.deposit.month, add.deposit.year);
+                system("cls");
+                printf("Changes saved!");
+            }
+            else
+            {
+                printf("Invalid choice");
+                goto invalid_state;
+            }
+        }
+        else
+        {
+            fprintf(newrec, "%d %s %d/%d/%d %d %s %lf %s %f %d/%d/%d\n", add.acc_no, add.name, add.dob.day, add.dob.month, add.dob.year, add.age, add.address, add.phone, add.acc_type, add.amt, add.deposit.day, add.deposit.month, add.deposit.year);
+        }
+    }
+
+    fclose(old);
+    fclose(newrec);
+    remove("record.dat");
+    rename("new.dat", "record.dat");
+
+    if (test != 1)
+    {
+        system("cls");
+        printf("\nRecord not found!!\a\a\a");
+    edit_invalid:
+        printf("\nEnter 0 to try again,1 to return to main menu and 2 to exit:");
+        scanf("%d", &main_exit);
+        system("cls");
+        if (main_exit == 1)
+
+            menu();
+        else if (main_exit == 2)
+            close();
+        else if (main_exit == 0)
+            edit();
+        else
+        {
+            printf("\nInvalid!\a");
+            goto edit_invalid;
+        }
+    }
+    else
+    {
+        printf("\n\n\nEnter 1 to go to the main menu and 0 to exit:");
+        scanf("%d", &main_exit);
+        system("cls");
+        if (main_exit == 1)
+            menu();
+        else
+            close();
+    }
+}
+
+// .
+// .
+// .
+// -> Menu 4 Option to see account information
 void see()
 {
     int test = 0, rate;
@@ -119,6 +222,7 @@ void see()
     FILE *ptr;
 
     ptr = fopen("record.dat", "r");
+
     printf("Do you want to check by\n1.Account no\n2.Name\nEnter your choice:");
     scanf("%d", &choice);
 
@@ -151,9 +255,183 @@ void see()
             }
         }
     }
+    else if (choice == 2)
+    {
+        printf("Enter the name:");
+        scanf("%s", &check.name);
+
+        while (fscanf(ptr, "%d %s %d/%d/%d %d %s %lf %s %f %d/%d/%d\n", &add.acc_no, add.name, &add.dob.day, &add.dob.month, &add.dob.year, &add.age, add.address, &add.phone, add.acc_type, &add.amt, &add.deposit.month, &add.deposit.day, &add.deposit.year) != EOF)
+        {
+            if (strcmp(add.name, check.name) == 0)
+            {
+                system("cls");
+                test = 1;
+
+                printf("\nAccount NO.:%d\nName:%s \nDOB:%d/%d/%d \nAge:%d \nAddress:%s \nPhone number:%.0lf \nType Of Account:%s \nAmount deposited:$ %.2f \nDate Of Deposit:%d/%d/%d\n\n", add.acc_no, add.name, add.dob.month, add.dob.day, add.dob.year, add.age, add.address, add.phone, add.acc_type, add.amt, add.deposit.month, add.deposit.day, add.deposit.year);
+
+                if (strcmpi(add.acc_type, "saving") == 0)
+                {
+                    time = (1.0 / 12.0);
+                    rate = 8;
+                    intrst = interest(time, add.amt, rate);
+                    printf("\nYou will get $.%.2f as interest on %d of every month", intrst, add.deposit.day);
+                }
+                else if (strcmpi(add.acc_type, "current") == 0)
+                {
+
+                    printf("\n\nYou will get no interest\a\a");
+                }
+            }
+        }
+    }
+    else
+    {
+        system("cls");
+        printf("Invalid choice\n");
+        see();
+    }
+
+    fclose(ptr);
+
+    if (test != 1)
+    {
+        system("cls");
+        printf("\nRecord not found!!\a\a\a");
+    see_invalid:
+        printf("\nEnter 0 to try again,1 to return to main menu and 2 to exit:");
+        scanf("%d", &main_exit);
+        system("cls");
+        if (main_exit == 1)
+            menu();
+        else if (main_exit == 2)
+            close();
+        else if (main_exit == 0)
+            see();
+        else
+        {
+            system("cls");
+            printf("\nInvalid!\a");
+            goto see_invalid;
+        }
+    }
+    else
+    {
+        printf("\nEnter 1 to go to the main menu and 0 to exit:");
+        scanf("%d", &main_exit);
+    }
+    if (main_exit == 1)
+    {
+        system("cls");
+        menu();
+    }
+
+    else
+    {
+        system("cls");
+        close();
+    }
 }
 
-void menu(void)
+// .
+// .
+// .
+// -> Menu 5 Option to erase data
+void erase()
+{
+    FILE *old, *newrec;
+    int test = 0;
+    old = fopen("record.dat", "r");
+    newrec = fopen("new.dat", "w");
+    printf("Enter the account no. of the customer you want to delete:");
+    scanf("%d", &rem.acc_no);
+
+    while (fscanf(old, "%d %s %d/%d/%d %d %s %lf %s %f %d/%d/%d", &add.acc_no, add.name, &add.dob.day, &add.dob.month, &add.dob.year, &add.age, add.address, &add.phone, add.acc_type, &add.amt, &add.deposit.day, &add.deposit.month, &add.deposit.year) != EOF)
+    {
+        if (add.acc_no != rem.acc_no)
+            fprintf(newrec, "%d %s %d/%d/%d %d %s %lf %s %f %d/%d/%d\n", add.acc_no, add.name, &add.dob.day, &add.dob.month, add.dob.year, add.age, add.address, add.phone, add.acc_type, add.amt, add.deposit.day, add.deposit.month, add.deposit.year);
+
+        else
+        {
+            test++;
+            printf("\nRecord deleted successfully!\n");
+        }
+    }
+    fclose(old);
+    fclose(newrec);
+    remove("record.dat");
+    rename("new.dat", "record.dat");
+    if (test == 0)
+    {
+        printf("\nRecord not found!!\a\a\a");
+    erase_invalid:
+        printf("\nEnter 0 to try again,1 to return to main menu and 2 to exit:");
+        scanf("%d", &main_exit);
+
+        if (main_exit == 1)
+            menu();
+        else if (main_exit == 2)
+            close();
+        else if (main_exit == 0)
+            erase();
+        else
+        {
+            printf("\nInvalid!\a");
+            goto erase_invalid;
+        }
+    }
+    else
+    {
+        printf("\nEnter 1 to go to the main menu and 0 to exit:");
+        scanf("%d", &main_exit);
+        system("cls");
+        if (main_exit == 1)
+            menu();
+        else
+            close();
+    }
+}
+
+void view_list()
+{
+    FILE *view;
+    view = fopen("record.dat", "r");
+    int test = 0;
+    system("cls");
+    printf("\nACC. NO.\tNAME\t\t\tADDRESS\t\t\tPHONE\n");
+
+    while (fscanf(view, "%d %s %d/%d/%d %d %s %lf %s %f %d/%d/%d", &add.acc_no, add.name, &add.dob.day, &add.dob.month, &add.dob.year, &add.age, add.address, &add.phone, add.acc_type, &add.amt, &add.deposit.day, &add.deposit.month, &add.deposit.year) != EOF)
+    {
+        printf("\n%6d\t %10s\t\t\t%10s\t\t%.0lf", add.acc_no, add.name, add.address, add.phone);
+        test++;
+    }
+
+    fclose(view);
+    if (test == 0)
+    {
+        system("cls");
+        printf("\nNO RECORDS!!\n");
+    }
+
+view_list_invalid:
+    printf("\n\nEnter 1 to go to the main menu and 0 to exit:");
+    scanf("%d", &main_exit);
+    system("cls");
+    if (main_exit == 1)
+        menu();
+    else if (main_exit == 0)
+        close();
+    else
+    {
+        printf("\nInvalid!\a");
+        goto view_list_invalid;
+    }
+}
+
+// .
+// .
+// .
+// -> Menu
+void menu()
 {
     int choice;
 
@@ -171,8 +449,17 @@ void menu(void)
     case 1:
         new_account();
         break;
+    case 2:
+        edit();
+        break;
     case 4:
         see();
+        break;
+    case 5:
+        erase();
+        break;
+    case 6:
+        view_list();
         break;
     case 7:
         close();
@@ -180,10 +467,11 @@ void menu(void)
     }
 }
 
+// main function
 int main()
 {
     char pass[10];
-    char password[10] = "gniot";
+    char password[10] = "gniot"; // password to access bank management system
 
     printf("Enter the password to login: ");
     scanf("%s", pass);
